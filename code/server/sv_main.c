@@ -1170,26 +1170,27 @@ a client based on its rate settings
 
 int SV_RateMsec(client_t *client)
 {
-	int rate, rateMsec;
+	int sacc_rate, rateMsec;
 	int messageSize;
 	
 	messageSize = client->netchan.lastSentSize;
-	rate = client->rate;
+
+    sacc_rate = client->sacc_rate;
 
 	if(sv_maxRate->integer)
 	{
-		if(sv_maxRate->integer < 1000)
-			Cvar_Set( "sv_MaxRate", "1000" );
-		if(sv_maxRate->integer < rate)
-			rate = sv_maxRate->integer;
+		if(sv_maxRate->integer < 10000)
+			Cvar_Set( "sv_MaxRate", "10000" );
+		if(sv_maxRate->integer < sacc_rate)
+			sacc_rate = sv_maxRate->integer;
 	}
 
 	if(sv_minRate->integer)
 	{
-		if(sv_minRate->integer < 1000)
-			Cvar_Set("sv_minRate", "1000");
-		if(sv_minRate->integer > rate)
-			rate = sv_minRate->integer;
+		if(sv_minRate->integer < 10000)
+			Cvar_Set("sv_minRate", "10000");
+		if(sv_minRate->integer > sacc_rate)
+			sacc_rate = sv_minRate->integer;
 	}
 
 	if(client->netchan.remoteAddress.type == NA_IP6)
@@ -1197,13 +1198,13 @@ int SV_RateMsec(client_t *client)
 	else
 		messageSize += UDPIP_HEADER_SIZE;
 		
-	rateMsec = messageSize * 1000 / ((int) (rate * com_timescale->value));
-	rate = Sys_Milliseconds() - client->netchan.lastSentTime;
+	rateMsec = messageSize * 1000 / ((int) (sacc_rate * com_timescale->value));
+	sacc_rate = Sys_Milliseconds() - client->netchan.lastSentTime;
 	
-	if(rate > rateMsec)
+	if(sacc_rate > rateMsec)
 		return 0;
 	else
-		return rateMsec - rate;
+		return rateMsec - sacc_rate;
 }
 
 /*

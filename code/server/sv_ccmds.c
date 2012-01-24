@@ -1125,7 +1125,7 @@ static void SV_Status_f( void ) {
 		
 		Com_Printf ("%5i", cl->netchan.qport);
 
-		Com_Printf (" %5i", cl->rate);
+		Com_Printf (" %5i", cl->sacc_rate);
 
 		Com_Printf ("\n");
 	}

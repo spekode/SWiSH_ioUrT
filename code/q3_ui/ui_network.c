@@ -65,7 +65,7 @@ typedef struct {
 	menutext_s		sound;
 	menutext_s		network;
 
-	menulist_s		rate;
+	menulist_s		sacc_rate;
 
 	menubitmap_s	back;
 } networkOptionsInfo_t;
@@ -103,20 +103,20 @@ static void UI_NetworkOptionsMenu_Event( void* ptr, int event ) {
 		break;
 
 	case ID_RATE:
-		if( networkOptionsInfo.rate.curvalue == 0 ) {
-			trap_Cvar_SetValue( "rate", 2500 );
+		if( networkOptionsInfo.sacc_rate.curvalue == 0 ) {
+			trap_Cvar_SetValue( "sacc_rate", 2500 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 1 ) {
-			trap_Cvar_SetValue( "rate", 3000 );
+		else if( networkOptionsInfo.sacc_rate.curvalue == 1 ) {
+			trap_Cvar_SetValue( "sacc_rate", 3000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 2 ) {
-			trap_Cvar_SetValue( "rate", 4000 );
+		else if( networkOptionsInfo.sacc_rate.curvalue == 2 ) {
+			trap_Cvar_SetValue( "sacc_rate", 4000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 3 ) {
-			trap_Cvar_SetValue( "rate", 5000 );
+		else if( networkOptionsInfo.sacc_rate.curvalue == 3 ) {
+			trap_Cvar_SetValue( "sacc_rate", 5000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 4 ) {
-			trap_Cvar_SetValue( "rate", 25000 );
+		else if( networkOptionsInfo.sacc_rate.curvalue == 4 ) {
+			trap_Cvar_SetValue( "sacc_rate", 25000 );
 		}
 		break;
 
@@ -134,7 +134,7 @@ UI_NetworkOptionsMenu_Init
 */
 static void UI_NetworkOptionsMenu_Init( void ) {
 	int		y;
-	int		rate;
+	int		sacc_rate;
 
 	memset( &networkOptionsInfo, 0, sizeof(networkOptionsInfo) );
 
@@ -207,14 +207,14 @@ static void UI_NetworkOptionsMenu_Init( void ) {
 	networkOptionsInfo.network.color				= color_red;
 
 	y = 240 - 1 * (BIGCHAR_HEIGHT+2);
-	networkOptionsInfo.rate.generic.type		= MTYPE_SPINCONTROL;
-	networkOptionsInfo.rate.generic.name		= "Data Rate:";
-	networkOptionsInfo.rate.generic.flags		= QMF_PULSEIFFOCUS|QMF_SMALLFONT;
-	networkOptionsInfo.rate.generic.callback	= UI_NetworkOptionsMenu_Event;
-	networkOptionsInfo.rate.generic.id			= ID_RATE;
-	networkOptionsInfo.rate.generic.x			= 400;
-	networkOptionsInfo.rate.generic.y			= y;
-	networkOptionsInfo.rate.itemnames			= rate_items;
+	networkOptionsInfo.sacc_rate.generic.type	  = MTYPE_SPINCONTROL;
+	networkOptionsInfo.sacc_rate.generic.name	  = "Data Rate:";
+	networkOptionsInfo.sacc_rate.generic.flags	  = QMF_PULSEIFFOCUS|QMF_SMALLFONT;
+	networkOptionsInfo.sacc_rate.generic.callback = UI_NetworkOptionsMenu_Event;
+	networkOptionsInfo.sacc_rate.generic.id			= ID_RATE;
+	networkOptionsInfo.sacc_rate.generic.x			= 400;
+	networkOptionsInfo.sacc_rate.generic.y			= y;
+	networkOptionsInfo.sacc_rate.itemnames			= rate_items;
 
 	networkOptionsInfo.back.generic.type		= MTYPE_BITMAP;
 	networkOptionsInfo.back.generic.name		= ART_BACK0;
@@ -234,24 +234,24 @@ static void UI_NetworkOptionsMenu_Init( void ) {
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.display );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.sound );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.network );
-	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.rate );
+	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.sacc_rate );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.back );
 
-	rate = trap_Cvar_VariableValue( "rate" );
-	if( rate <= 2500 ) {
-		networkOptionsInfo.rate.curvalue = 0;
+	sacc_rate = trap_Cvar_VariableValue( "sacc_rate" );
+	if( sacc_rate <= 2500 ) {
+		networkOptionsInfo.sacc_rate.curvalue = 0;
 	}
-	else if( rate <= 3000 ) {
-		networkOptionsInfo.rate.curvalue = 1;
+	else if( sacc_rate <= 3000 ) {
+		networkOptionsInfo.sacc_rate.curvalue = 1;
 	}
-	else if( rate <= 4000 ) {
-		networkOptionsInfo.rate.curvalue = 2;
+	else if( sacc_rate <= 4000 ) {
+		networkOptionsInfo.sacc_rate.curvalue = 2;
 	}
-	else if( rate <= 5000 ) {
-		networkOptionsInfo.rate.curvalue = 3;
+	else if( sacc_rate <= 5000 ) {
+		networkOptionsInfo.sacc_rate.curvalue = 3;
 	}
 	else {
-		networkOptionsInfo.rate.curvalue = 4;
+		networkOptionsInfo.sacc_rate.curvalue = 4;
 	}
 }
 

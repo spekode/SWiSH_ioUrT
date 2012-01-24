@@ -64,7 +64,7 @@ int SV_BotAllocateClient(void) {
 	cl->state = CS_ACTIVE;
 	cl->lastPacketTime = svs.time;
 	cl->netchan.remoteAddress.type = NA_BOT;
-	cl->rate = 16384;
+	cl->sacc_rate = 16384;
 
 	return i;
 }

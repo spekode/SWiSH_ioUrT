@@ -916,6 +916,8 @@ Fill up msg with data, return number of download blocks added
 int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 {
 	int curindex;
+    int sacc_rate;
+    int blockspersnap;
 	int unreferenced = 1;
 	char errorMessage[1024];
 	char pakbuf[MAX_QPATH], *pakptr;
@@ -1071,42 +1073,70 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 		cl->downloadEOF = qtrue;  // We have added the EOF block
 	}
 
+    sacc_rate = cl->sacc_rate;
+    if ( sv_maxRate->integer ) {
+        if ( sv_maxRate->integer < 1000 ) {
+            Cvar_Set ( "sv_maxRate", "1000" );
+        }
+        if ( sv_maxRate->integer < sacc_rate ) {
+            sacc_rate = sv_maxRate->integer;
+        }
+    }
+    if ( sv_minRate->integer ) {
+        if ( sv_minRate->integer < 1000) {
+            Cvar_Set ( "sv_minRate", "1000" );
+        }
+        if ( sv_minRate->integer > sacc_rate ) {
+            sacc_rate = sv_minRate->integer;
+        }
+    }
+
+    if ( !sacc_rate ) {
+        blockspersnap = 1;
+    } else {
+        blockspersnap = ( (sacc_rate * cl->snapshotMsec) / 1000 * MAX_DOWNLOAD_BLKSIZE ) / MAX_DOWNLOAD_BLKSIZE;
+    }
+
+    if ( blockspersnap < 0 ) blockspersnap = 1;
+
 	if (cl->downloadClientBlock == cl->downloadCurrentBlock)
 		return 0; // Nothing to transmit
 
-	// Write out the next section of the file, if we have already reached our window,
-	// automatically start retransmitting
-	if (cl->downloadXmitBlock == cl->downloadCurrentBlock)
-	{
-		// We have transmitted the complete window, should we start resending?
-		if (svs.time - cl->downloadSendTime > 1000)
-			cl->downloadXmitBlock = cl->downloadClientBlock;
-		else
-			return 0;
-	}
+    while ( blockspersnap-- ) {
+    	// Write out the next section of the file, if we have already reached our window,
+    	// automatically start retransmitting
+    	if (cl->downloadXmitBlock == cl->downloadCurrentBlock)
+    	{
+    		// We have transmitted the complete window, should we start resending?
+    		if (svs.time - cl->downloadSendTime > 1000)
+    			cl->downloadXmitBlock = cl->downloadClientBlock;
+    		else
+    			return 0;
+    	}
 
-	// Send current block
-	curindex = (cl->downloadXmitBlock % MAX_DOWNLOAD_WINDOW);
+    	// Send current block
+    	curindex = (cl->downloadXmitBlock % MAX_DOWNLOAD_WINDOW);
 
-	MSG_WriteByte( msg, svc_download );
-	MSG_WriteShort( msg, cl->downloadXmitBlock );
+    	MSG_WriteByte( msg, svc_download );
+    	MSG_WriteShort( msg, cl->downloadXmitBlock );
 
-	// block zero is special, contains file size
-	if ( cl->downloadXmitBlock == 0 )
-		MSG_WriteLong( msg, cl->downloadSize );
+    	// block zero is special, contains file size
+    	if ( cl->downloadXmitBlock == 0 )
+    		MSG_WriteLong( msg, cl->downloadSize );
 
-	MSG_WriteShort( msg, cl->downloadBlockSize[curindex] );
+    	MSG_WriteShort( msg, cl->downloadBlockSize[curindex] );
 
-	// Write the block
-	if(cl->downloadBlockSize[curindex])
-		MSG_WriteData(msg, cl->downloadBlocks[curindex], cl->downloadBlockSize[curindex]);
+    	// Write the block
+    	if(cl->downloadBlockSize[curindex])
+    		MSG_WriteData(msg, cl->downloadBlocks[curindex], cl->downloadBlockSize[curindex]);
 
-	Com_DPrintf( "clientDownload: %d : writing block %d\n", (int) (cl - svs.clients), cl->downloadXmitBlock );
+    	Com_DPrintf( "clientDownload: %d : writing block %d\n", (int) (cl - svs.clients), cl->downloadXmitBlock );
 
-	// Move on to the next block
-	// It will get sent with next snap shot.  The rate will keep us in line.
-	cl->downloadXmitBlock++;
-	cl->downloadSendTime = svs.time;
+    	// Move on to the next block
+    	// It will get sent with next snap shot.  The rate will keep us in line.
+    	cl->downloadXmitBlock++;
+    	cl->downloadSendTime = svs.time;
+    }
 
 	return 1;
 }
@@ -1388,19 +1418,19 @@ void SV_UserinfoChanged( client_t *cl ) {
 	// if the client is on the same subnet as the server and we aren't running an
 	// internet public server, assume they don't need a rate choke
 	if ( Sys_IsLANAddress( cl->netchan.remoteAddress ) && com_dedicated->integer != 2 && sv_lanForceRate->integer == 1) {
-		cl->rate = 99999;	// lans should not rate limit
+		cl->sacc_rate = 99999;	// lans should not rate limit
 	} else {
 		val = Info_ValueForKey (cl->userinfo, "rate");
 		if (strlen(val)) {
 			i = atoi(val);
-			cl->rate = i;
-			if (cl->rate < 1000) {
-				cl->rate = 1000;
-			} else if (cl->rate > 90000) {
-				cl->rate = 90000;
+			cl->sacc_rate = i;
+			if (cl->sacc_rate < 1000) {
+				cl->sacc_rate = 1000;
+			} else if (cl->sacc_rate > 90000) {
+				cl->sacc_rate = 90000;
 			}
 		} else {
-			cl->rate = 3000;
+			cl->sacc_rate = 3000;
 		}
 	}
 	val = Info_ValueForKey (cl->userinfo, "handicap");

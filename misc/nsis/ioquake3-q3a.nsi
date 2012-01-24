@@ -22,7 +22,7 @@ Var q3a_pak0
 Var q3ta_pak0
 
 !include "MUI2.nsh"
-!define MUI_ICON "../quake3.ico"
+!define MUI_ICON "../q3ut4.ico"
 
 ; The name of the installer
 Name "${NAME}-${VERSION} for ioquake3"

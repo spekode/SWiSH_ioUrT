@@ -629,6 +629,16 @@ int main( int argc, char **argv )
 
 	CON_Init( );
 
+    Com_Printf("\n"
+               "   ^7S^5ACC ^7Wi^5th ^7S^5ound ^7H^5ax by strata\n"
+               "      ^7 ___ _   __    ___  _ __\n"
+               "     ^7,' _////7/ /(),' _/ /// /\n"
+               "    ^7_\\ `.| V V //7_\\ `. / ` /\n"
+               "   ^7/___,'|_n_,'///___,'/_n_/\n"
+               "                ^5version 1^7.^51\n");
+
+    Com_Printf("\n   http://swish.dropswitch.net\n");
+
 	signal( SIGILL, Sys_SigHandler );
 	signal( SIGFPE, Sys_SigHandler );
 	signal( SIGSEGV, Sys_SigHandler );
