@@ -30,6 +30,7 @@ cvar_t		*cl_debuggraph;
 cvar_t		*cl_graphheight;
 cvar_t		*cl_graphscale;
 cvar_t		*cl_graphshift;
+cvar_t		*cl_demotext;
 
 /*
 ================
@@ -338,6 +339,10 @@ void SCR_DrawDemoRecording( void ) {
 		return;
 	}
 
+	if ( !cl_demotext->integer ) {
+		return;
+	}
+
 	pos = FS_FTell( clc.demofile );
 	sprintf( string, "RECORDING %s: %ik", clc.demoName, pos / 1024 );
 
@@ -456,6 +461,7 @@ void SCR_Init( void ) {
 	cl_graphheight = Cvar_Get ("graphheight", "32", CVAR_CHEAT);
 	cl_graphscale = Cvar_Get ("graphscale", "1", CVAR_CHEAT);
 	cl_graphshift = Cvar_Get ("graphshift", "0", CVAR_CHEAT);
+	cl_demotext = Cvar_Get ("cl_demotext", "1", 0);
 
 	scr_initialized = qtrue;
 }
